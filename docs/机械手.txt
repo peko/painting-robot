@@ -1,0 +1,3 @@
+机械手 Манипулятор
+机器人 robot
+水墨画 ink painting
