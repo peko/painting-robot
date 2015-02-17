@@ -59,9 +59,9 @@ void d2xy(int n, int d, int *x, int *y) {
     }
 }
 
-//void stepper(int xw, int s);
-void loop() {
-  int cell_size = 50;
+void hilbert() {
+  
+  int cell_size = 25;
   int n = 0;
   int s = 2048;
   int ox = 0;
@@ -109,9 +109,138 @@ void loop() {
   }
 }
 
+void vibrating_hilbert() {
+  
+  int cell_size = 25;
+  int n = 0;
+  int s = 2048;
+  int ox = 0;
+  int oy = 0;
+  int x = 0;
+  int y = 0;
+  
+  while(n<s) {
+   
+    d2xy(s, n, &x, &y);
+    int dx = x - ox;
+    int dy = y - oy; 
+    int steps;
+   
+//    cell_size = 25+25*(sin(x*PI/16.0)+cos(y*PI/16.0));
+
+    cell_size = 25+x*y/20;
+
+    Direction = dx>0;
+    steps = abs(dx)*cell_size;
+    while(steps>0){
+      currentMillis = micros();
+      if(currentMillis-last_time>=1000){
+        stepper(1,0);
+        time=time+micros()-last_time;
+        last_time=micros();
+        steps--;
+      }
+    }
+    
+    Direction = dy>0;
+    steps = abs(dy)*cell_size;
+    while(steps>0){
+      currentMillis = micros();
+      if(currentMillis-last_time>=1000){
+        stepper(1,4);
+        time=time+micros()-last_time;
+        last_time=micros();
+        steps--;
+      }
+    }
+    
+    ox = x;
+    oy = y;
+    n++;
+  }
+}
+
+void spiral() {
+  
+  int R = 10;
+  int dr = 10;
+  int steps =0;
+  while(R<2000) {
+
+    steps = R;
+    while(steps>0){
+      currentMillis = micros();
+      if(currentMillis-last_time>=1000){
+        stepper(1,0);
+        time=time+micros()-last_time;
+        last_time=micros();
+        steps--;
+      }
+    }
+    R+=dr;
+    steps = R;
+    while(steps>0){
+      currentMillis = micros();
+      if(currentMillis-last_time>=1000){
+        stepper(1,4);
+        time=time+micros()-last_time;
+        last_time=micros();
+        steps--;
+      }
+    }
+    R+=dr;
+    Direction = !Direction;
+    dr+=1;
+  }
+}
+
+void tricky_spirals() {
+  
+  int R = 10;
+  int dr = 10;
+  int steps =0;
+  while(R<500) {
+
+    steps = R;
+    while(steps>0){
+      currentMillis = micros();
+      if(currentMillis-last_time>=1000){
+        stepper(1,0);
+        time=time+micros()-last_time;
+        last_time=micros();
+        steps--;
+      }
+      if(random(5000)==100) Direction = !Direction;
+    }
+    R+=dr;
+    steps = R;
+    while(steps>0){
+      currentMillis = micros();
+      if(currentMillis-last_time>=1000){
+        stepper(1,4);
+        time=time+micros()-last_time;
+        last_time=micros();
+        steps--;
+      }
+      if(random(5000)==100) Direction = !Direction;
+    }
+    R+=dr;
+    Direction = !Direction;
+    dr+=1;
+  }
+}
+
+//void stepper(int xw, int s);
+void loop() {
+ 
+ vibrating_hilbert(); 
+//   spiral();
+//tricky_spirals();
+}
+
 void stepper(int xw, int s){
   for (int x=0;x<xw;x++){
-    delay(100);
+    delay(5);
     switch(Steps){
        case 0:
          digitalWrite(p[0+s], LOW); 
