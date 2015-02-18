@@ -61,21 +61,23 @@ void d2xy(int n, int d, int *x, int *y) {
 
 void hilbert() {
   
-  int cell_size = 25;
+  int cell_size = 15;
   int n = 0;
-  int s = 2048;
+  int s = 4096;
   int ox = 0;
   int oy = 0;
   int x = 0;
   int y = 0;
   
-  while(n<s) {
+  while(true) {
    
     d2xy(s, n, &x, &y);
     int dx = x - ox;
     int dy = y - oy; 
     int steps;
    
+    if(!(n%64)) cell_size=10+random(5)*5;
+    
     Serial.println(dx,DEC);
     Serial.println(dy,DEC);
    
@@ -232,15 +234,15 @@ void tricky_spirals() {
 
 //void stepper(int xw, int s);
 void loop() {
- 
- vibrating_hilbert(); 
+   hilbert();
+// vibrating_hilbert(); 
 //   spiral();
-//tricky_spirals();
+//     tricky_spirals();
 }
 
 void stepper(int xw, int s){
   for (int x=0;x<xw;x++){
-    delay(5);
+    delay(10);
     switch(Steps){
        case 0:
          digitalWrite(p[0+s], LOW); 
