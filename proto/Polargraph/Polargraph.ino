@@ -76,7 +76,6 @@ void hilbert() {
     int dy = y - oy; 
     int steps;
    
-    if(!(n%64)) cell_size=10+random(5)*5;
     
     Serial.println(dx,DEC);
     Serial.println(dy,DEC);

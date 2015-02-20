@@ -1,19 +1,19 @@
-#define MINIMUM_DELAY_BETWEEN_STEPS 1000
-#define STEPS_PER_REVOLUTION 64
+#define MINIMUM_DELAY_BETWEEN_STEPS 5000
+#define STEPS_PER_REVOLUTION 64*16
 #define DISTANCE_BETWEEN_MOTORS 1175
 #define LEFT_STRING_LENGTH 720
 #define RIGHT_STRING_LENGTH 720
 #define VELOCITY 1.0
 
-#define L0 2
-#define L1 3
-#define L2 4
-#define L3 5
+#define L0 10
+#define L1 11
+#define L2 12
+#define L3 13
 
-#define R0 10
-#define R1 11
-#define R2 12
-#define R3 13
+#define R0 2
+#define R1 3
+#define R2 4
+#define R3 5
 
 
 uint8_t stepper_states[36] = {
@@ -71,7 +71,7 @@ void setup(){
     pinMode(pins_right[i], OUTPUT); 
   }
   
-  delay(10000);
+  delay(5000);
 
 }
 
@@ -101,8 +101,8 @@ void calcGeometry() {
 // covert cartesian dx, dy to polar du,dv
 struct vector toPolar( struct vector c) {
   
-  l += c.x;
-  h += c.y;
+  l -= c.x;
+  h -= c.y;
   Ln = sqrt(h*h+l*l);
   
   r = W-l;
@@ -127,7 +127,7 @@ void move(struct vector c) {
   struct vector p = toPolar(c);     // polar contractions
   
   // convert mm to Steps
-  p.x *= S; 
+  p.x *=-S; 
   p.y *= S; 
 
   Serial.print("Steps:");
@@ -146,32 +146,32 @@ void move(struct vector c) {
     mc = micros();
     
     if(stepsR>0 && mc-mcr>=tr){
-      mcr = micros();
+
       
       if(p.y<0) doStepR(-1);
       else      doStepR(1);
-
+      
+      mcr = micros();
+            
       Serial.print("r: ");
       Serial.println(stepsR);
       stepsR--;
     }
     
     if(stepsL>0 && mc-mcl>=tl) {
-      mcl = micros();  
       
       if(p.x>0) doStepL(-1);
       else      doStepL(1);
-
+      
+      mcl = micros();  
+      
       Serial.print("l: ");
       Serial.println(stepsL);
       
       stepsL--;
     }
     
-
-    
   }
-  delay(700);
   L = Ln; // new L length
   R = Rn; // new R length
    
@@ -198,11 +198,11 @@ void squre() {
 }
 
 void circle(float R) {
-  float steps= 8.0;
+  float steps= 5.0;
   move({R, 0});
   for (int i = 0; i<steps; i++) {
     move({R * sin(i*PI*2/steps), R * cos(i*PI*2/ steps)});
-    delay(300);
+//    delay(300);
   }
   move({-R,0});
 }
@@ -210,15 +210,14 @@ void circle(float R) {
 void crossV() {
   int st = 1000;
   int sh = st>>1; 
-  move({ sh,   0});
-  move({-sh,   0});
-  move({   0, sh});
-  move({   0,-sh}); 
-  move({ -sh,  0});
-  move({  sh,  0});
-  move({   0,-sh});
-  move({   0, sh}); 
- 
+  move({ sh,   0}); delay(1000);
+  move({-sh,   0}); delay(1000);
+  move({   0, sh}); delay(1000);
+  move({   0,-sh}); delay(1000);
+  move({ -sh,  0}); delay(1000);
+  move({  sh,  0}); delay(1000);
+  move({   0,-sh}); delay(1000);
+  move({   0, sh}); delay(1000);
 }
 
 
@@ -234,46 +233,69 @@ void crossD() {
 
 void Test() {
   
-  // extend left
-  for (int i=0;i<STEPS_PER_REVOLUTION;i++) {
-    doStepL(1);
-    delayMicroseconds(MINIMUM_DELAY_BETWEEN_STEPS);
-  }
-  
-  // contract left
-  for (int i=0;i<STEPS_PER_REVOLUTION;i++) {
-    doStepL(-1);
-    delayMicroseconds(MINIMUM_DELAY_BETWEEN_STEPS);
-  }
-  
+//  // extend left
+//  for (int i=0;i<STEPS_PER_REVOLUTION;i++) {
+//    doStepL(1);
+//    delayMicroseconds(MINIMUM_DELAY_BETWEEN_STEPS);
+//  }
+//  delay(1000);
+//  
+//  // contract left
+//  for (int i=0;i<STEPS_PER_REVOLUTION;i++) {
+//    doStepL(-1);
+//    delayMicroseconds(MINIMUM_DELAY_BETWEEN_STEPS);
+//  }
+//  delay(1000);
+//  
   // extend right
   for (int i=0;i<STEPS_PER_REVOLUTION;i++) {
     doStepR(1);
     delayMicroseconds(MINIMUM_DELAY_BETWEEN_STEPS);
   }
+  delay(1000);
   
   // contract right
   for (int i=0;i<STEPS_PER_REVOLUTION;i++) {
     doStepR(-1);
     delayMicroseconds(MINIMUM_DELAY_BETWEEN_STEPS);
   }
+  delay(1000);
+  
+//  delay(5000);
   
 }
 
+void spiral() {
+  int i = 100;
+  int di = 1;
+  while(i<10000) {  
+    move({ i,   0}); delay(1000); i+=di;
+    move({ 0,   i}); delay(1000); i+=di;
+    move({-i,   0}); delay(1000); i+=di;
+    move({ 0,  -i}); delay(1000); i+=di;
+  }
+    
+}
+
 void loop() {
-// circle(50+random(250));  
+//  circle(200);  
 //    crossV();
 //  crossD();
+//  Test();
+
+   spiral();
+  
 }
 
 void doStepL(char d) {
+ 
   static char step = 8; // OFF STEP
   for(int i=0; i<4; i++) {
     digitalWrite(pins_left[i],stepper_states[i+(step<<2)]);
   }
-  S+=d;
-  if(S>7) S=0;
-  if(S<0) S=7;
+  step+=d;
+  if(step>7) step=0;
+  if(step<0) step=7;
 }
 
 void doStepR(char d) {
@@ -281,8 +303,8 @@ void doStepR(char d) {
   for(int i=0; i<4; i++) {
     digitalWrite(pins_right[i],stepper_states[i+(step<<2)]);
   }
-  S+=d;
-  if(S>7) S=0;
-  if(S<0) S=7;
+  step+=d;
+  if(step>7) step=0;
+  if(step<0) step=7;
 }
 
