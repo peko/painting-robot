@@ -1,19 +1,40 @@
-#define LEFT 500
+#define MINIMUM_DELAY_BETWEEN_STEPS 1000
+#define STEPS_PER_REVOLUTION 64
+#define DISTANCE_BETWEEN_MOTORS 1175
+#define LEFT_STRING_LENGTH 720
+#define RIGHT_STRING_LENGTH 720
+#define VELOCITY 1.0
 
-unsigned char p[8] = {2,3,4,5, 13,12,11,10};
+#define L0 2
+#define L1 3
+#define L2 4
+#define L3 5
+
+#define R0 10
+#define R1 11
+#define R2 12
+#define R3 13
+
+
+uint8_t stepper_states[36] = {
+   LOW,  LOW,  LOW, HIGH, // 0
+   LOW,  LOW, HIGH, HIGH, // 1
+   LOW,  LOW, HIGH,  LOW, // 2
+   LOW, HIGH, HIGH,  LOW, // 3
+   LOW, HIGH,  LOW,  LOW, // 4
+  HIGH, HIGH,  LOW,  LOW, // 5
+  HIGH,  LOW,  LOW,  LOW, // 6
+  HIGH,  LOW,  LOW, HIGH, // 7
+   LOW,  LOW,  LOW,  LOW  // OFF STATE 
+};
 
 struct vector {
   double x;
   double y;
 };
 
-int Steps = 0;
-
-boolean Direction = true;// gre
-unsigned long last_time;
-unsigned long currentMillis ;
-int steps_left=LEFT;
-long time;
+unsigned char pins_left [4] = {L0,L1,L2,L3}; // direct  order
+unsigned char pins_right[4] = {R3,R2,R1,R0}; // reverse order
 
 double 
   l, // x coordinate relative left motor mm
@@ -38,15 +59,17 @@ void setup(){
   
   S = 1.66982235375;
 
-  W = 1175;
-  L = 720;
-  R = 720;
-  V = 1.0; // mm/s
+  W = DISTANCE_BETWEEN_MOTORS;
+  L = LEFT_STRING_LENGTH;
+  R = RIGHT_STRING_LENGTH;
+  V = VELOCITY; // mm/s
 
   calcGeometry();
   
-  for(int i=0;i<8;i++)
-    pinMode(p[i], OUTPUT); 
+  for(int i=0;i<4;i++) {
+    pinMode(pins_left [i], OUTPUT); 
+    pinMode(pins_right[i], OUTPUT); 
+  }
   
   delay(10000);
 
@@ -54,10 +77,11 @@ void setup(){
 
 void calcGeometry() {
   double p = (W + L + R)/2.0;            // half perimeter
-  double ir = sqrt((p-L)*(p-R)*(p-W)/p); // incircle
-  h = 2.0 * p * ir / W;                 // height
+  double ir = sqrt((p-L)*(p-R)*(p-W)/p); // incircle radius
+  h = 2.0 * p * ir / W;                  // height
   l = sqrt(L*L-h*h);                     // left projection
   r = W - l;                             // right projection
+  
   Serial.println("Calc geomtry:");
   Serial.print("p: ");
   Serial.println(p);
@@ -77,8 +101,8 @@ void calcGeometry() {
 // covert cartesian dx, dy to polar du,dv
 struct vector toPolar( struct vector c) {
   
-  h += c.x;
-  l += c.y;
+  l += c.x;
+  h += c.y;
   Ln = sqrt(h*h+l*l);
   
   r = W-l;
@@ -133,7 +157,7 @@ void move(struct vector c) {
     }
     
     if(stepsL>0 && mc-mcl>=tl) {
-      mcl = micros();
+      mcl = micros();  
       
       if(p.x>0) doStepL(-1);
       else      doStepL(1);
@@ -208,144 +232,57 @@ void crossD() {
   for( int i=0;i< 5; i++) move({-st,-st});
 }
 
+void Test() {
+  
+  // extend left
+  for (int i=0;i<STEPS_PER_REVOLUTION;i++) {
+    doStepL(1);
+    delayMicroseconds(MINIMUM_DELAY_BETWEEN_STEPS);
+  }
+  
+  // contract left
+  for (int i=0;i<STEPS_PER_REVOLUTION;i++) {
+    doStepL(-1);
+    delayMicroseconds(MINIMUM_DELAY_BETWEEN_STEPS);
+  }
+  
+  // extend right
+  for (int i=0;i<STEPS_PER_REVOLUTION;i++) {
+    doStepR(1);
+    delayMicroseconds(MINIMUM_DELAY_BETWEEN_STEPS);
+  }
+  
+  // contract right
+  for (int i=0;i<STEPS_PER_REVOLUTION;i++) {
+    doStepR(-1);
+    delayMicroseconds(MINIMUM_DELAY_BETWEEN_STEPS);
+  }
+  
+}
+
 void loop() {
 // circle(50+random(250));  
-    crossV();
+//    crossV();
 //  crossD();
 }
 
 void doStepL(char d) {
-    
-  static char S = 0;
-  char s = 0;
-  delay(1);
-  switch(S){
-     case 0:
-       digitalWrite(p[0+s], LOW); 
-       digitalWrite(p[1+s], LOW);
-       digitalWrite(p[2+s], LOW);
-       digitalWrite(p[3+s], HIGH);
-     break; 
-     case 1:
-       digitalWrite(p[0+s], LOW); 
-       digitalWrite(p[1+s], LOW);
-       digitalWrite(p[2+s], HIGH);
-       digitalWrite(p[3+s], HIGH);
-     break; 
-     case 2:
-       digitalWrite(p[0+s], LOW); 
-       digitalWrite(p[1+s], LOW);
-       digitalWrite(p[2+s], HIGH);
-       digitalWrite(p[3+s], LOW);
-     break; 
-     case 3:
-       digitalWrite(p[0+s], LOW); 
-       digitalWrite(p[1+s], HIGH);
-       digitalWrite(p[2+s], HIGH);
-       digitalWrite(p[3+s], LOW);
-     break; 
-     case 4:
-       digitalWrite(p[0+s], LOW); 
-       digitalWrite(p[1+s], HIGH);
-       digitalWrite(p[2+s], LOW);
-       digitalWrite(p[3+s], LOW);
-     break; 
-     case 5:
-       digitalWrite(p[0+s], HIGH); 
-       digitalWrite(p[1+s], HIGH);
-       digitalWrite(p[2+s], LOW);
-       digitalWrite(p[3+s], LOW);
-     break; 
-       case 6:
-       digitalWrite(p[0+s], HIGH); 
-       digitalWrite(p[1+s], LOW);
-       digitalWrite(p[2+s], LOW);
-       digitalWrite(p[3+s], LOW);
-     break; 
-     case 7:
-       digitalWrite(p[0+s], HIGH); 
-       digitalWrite(p[1+s], LOW);
-       digitalWrite(p[2+s], LOW);
-       digitalWrite(p[3+s], HIGH);
-     break; 
-     default:
-       digitalWrite(p[0+s], LOW); 
-       digitalWrite(p[1+s], LOW);
-       digitalWrite(p[2+s], LOW);
-       digitalWrite(p[3+s], LOW);
-     break; 
+  static char step = 8; // OFF STEP
+  for(int i=0; i<4; i++) {
+    digitalWrite(pins_left[i],stepper_states[i+(step<<2)]);
   }
-  
   S+=d;
   if(S>7) S=0;
   if(S<0) S=7;
 }
 
 void doStepR(char d) {
-    
-  static char S = 0;
-  char s = 4;
-  delay(5);
-  switch(S){
-     case 0:
-       digitalWrite(p[0+s], LOW); 
-       digitalWrite(p[1+s], LOW);
-       digitalWrite(p[2+s], LOW);
-       digitalWrite(p[3+s], HIGH);
-     break; 
-     case 1:
-       digitalWrite(p[0+s], LOW); 
-       digitalWrite(p[1+s], LOW);
-       digitalWrite(p[2+s], HIGH);
-       digitalWrite(p[3+s], HIGH);
-     break; 
-     case 2:
-       digitalWrite(p[0+s], LOW); 
-       digitalWrite(p[1+s], LOW);
-       digitalWrite(p[2+s], HIGH);
-       digitalWrite(p[3+s], LOW);
-     break; 
-     case 3:
-       digitalWrite(p[0+s], LOW); 
-       digitalWrite(p[1+s], HIGH);
-       digitalWrite(p[2+s], HIGH);
-       digitalWrite(p[3+s], LOW);
-     break; 
-     case 4:
-       digitalWrite(p[0+s], LOW); 
-       digitalWrite(p[1+s], HIGH);
-       digitalWrite(p[2+s], LOW);
-       digitalWrite(p[3+s], LOW);
-     break; 
-     case 5:
-       digitalWrite(p[0+s], HIGH); 
-       digitalWrite(p[1+s], HIGH);
-       digitalWrite(p[2+s], LOW);
-       digitalWrite(p[3+s], LOW);
-     break; 
-       case 6:
-       digitalWrite(p[0+s], HIGH); 
-       digitalWrite(p[1+s], LOW);
-       digitalWrite(p[2+s], LOW);
-       digitalWrite(p[3+s], LOW);
-     break; 
-     case 7:
-       digitalWrite(p[0+s], HIGH); 
-       digitalWrite(p[1+s], LOW);
-       digitalWrite(p[2+s], LOW);
-       digitalWrite(p[3+s], HIGH);
-     break; 
-     default:
-       digitalWrite(p[0+s], LOW); 
-       digitalWrite(p[1+s], LOW);
-       digitalWrite(p[2+s], LOW);
-       digitalWrite(p[3+s], LOW);
-     break; 
+  static char step = 8; // OFF STEP
+  for(int i=0; i<4; i++) {
+    digitalWrite(pins_right[i],stepper_states[i+(step<<2)]);
   }
-  
   S+=d;
   if(S>7) S=0;
   if(S<0) S=7;
 }
-
 
