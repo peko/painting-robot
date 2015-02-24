@@ -4,10 +4,12 @@
 #define DISTANCE_BETWEEN_MOTORS 800
 #define LEFT_STRING_LENGTH 720
 #define RIGHT_STRING_LENGTH 720
-#define VELOCITY 10.0
+#define VELOCITY 15
 #define WIDTH 300.0
 #define HEIGHT 300.0
 #define SEED 9
+
+#define SERVO_PIN 9
 
 #define L0 10
 #define L1 11
@@ -19,6 +21,8 @@
 #define R2 4
 #define R3 5
 
+#include <Servo.h>
+Servo servo;
 
 uint8_t stepper_states[36] = {
    LOW,  LOW,  LOW, HIGH, // 0
@@ -51,10 +55,6 @@ double
   W, // Distance between motors mm
   V, // Moving velocity mm/s
   S; // Steps of motor per mm; 
-  
-#include "tests.h"
-//#include "panda.h"
-//#include "planes.h"
 
 void setup(){
   
@@ -79,48 +79,53 @@ void setup(){
     pinMode(pins_right[i], OUTPUT); 
   }
   
+  servo.attach(SERVO_PIN);
+  up();
   delay(1000);
-
+  
+  Serial.println("RDY");
 }
 
-void border() {
-  move({-WIDTH/2.0,-HEIGHT/2.0});
-  move({WIDTH,0});
-  move({0,HEIGHT});
-  move({-WIDTH,0});
-  move({0,-HEIGHT});
-  move({WIDTH,0});
-  move({-WIDTH/2.0,HEIGHT/2.0});
+void loop() {  
+  while (Serial.available()) {
+    char cmd = Serial.read();
+    
+    while(cmd==0x20) {
+       Serial.print("."); 
+       cmd = Serial.read();
+    }
+    
+    Serial.print(cmd);
+    Serial.print(" 0x");
+    Serial.println(cmd, HEX);
+    
+    switch(cmd){
+      case 'u':
+        up();
+        break;
+      case 'd':
+        down();
+        break;
+      case 'm':
+        moveto({Serial.parseFloat(),  Serial.parseFloat()});
+        break;
+      case 'l':
+        lineto({Serial.parseFloat(),  Serial.parseFloat()});
+        break;
+      case 'z':
+        up();
+        break;
+    }
+    Serial.println("OK");
+  }
 }
 
-void loop() {
-//  draw_panda(0.02+random(50)/1000.0);
-//  move_random(20.0);
-// spiral(); 
-//  draw_ailove(random(5));
-//  move_random(5+random(20)); 
-//  trajectory();
-//
-//
-//
-//draw_panda(0.3);
-//move_random(20.0);
-circle(2);
-move({30,0});
-circle(2);
-move({-20,0});
-circle(1);
-move({15,0});
-circle(1);
-delay(1000);
-
+void up() {
+  servo.write(40);
 }
 
-
-void move_random(float d) {
-  double angle=random(360)/180.0*PI;
-  vector v = {d*sin(angle), d*cos(angle)};
-  move(v);
+void down() {
+  servo.write(5);
 }
 
 void calcGeometry() {
@@ -131,13 +136,13 @@ void calcGeometry() {
   l = sqrt(L*L-h*h);                     // left projection
   r = W - l;                             // right projection
   
-  Serial.println("Calc geomtry:" );
-  print_f("Half perim" , p , "mm");
-  print_f("In circle r", ir, "mm");
-  print_f("Height"     , h , "mm");
-  print_f("Left"       , l , "mm");
-  print_f("Rigth"      , r , "mm");
-  Serial.println("-------------" );
+//  Serial.println("Calc geomtry:" );
+//  print_f("Half perim" , p , "mm");
+//  print_f("In circle r", ir, "mm");
+//  print_f("Height"     , h , "mm");
+//  print_f("Left"       , l , "mm");
+//  print_f("Rigth"      , r , "mm");
+//  Serial.println("-------------" );
 }
 
 // covert cartesian dx, dy to polar du,dv
@@ -174,25 +179,33 @@ void print_v(char* title, struct vector v,  char* units){
   Serial.println(units);  
 };
 
-void move(struct vector c) {
+void moveto(struct vector c) {
+  up();
+  delay(300);
+  lineto(c);
+  down();
+  delay(300);
+}
+
+void lineto(struct vector c) {
   
-  print_v("Move", c, "mm");
+//  print_v("Move", c, "mm");
   
   unsigned long mc=0, mcl=0, mcr=0;
   
   double d = sqrt(c.x*c.x+c.y*c.y); // distance to move 
-  print_f("Dist", d, "mm");
+//  print_f("Dist", d, "mm");
   
   double t = d/V;                   // time to move distance / velocity
-  print_f("Time", t, "s");
+//  print_f("Time", t, "s");
   
   struct vector p = toPolar(c);     // polar contractions
-  print_v("dL,dR",p,"mm");
+//  print_v("dL,dR",p,"mm");
   
   // convert mm to Steps
   p.x *= S; 
   p.y *= S; 
-  print_v("dL,dR",p,"steps");
+//  print_v("dL,dR",p,"steps");
     
   double stepsL = abs(p.x);
   double stepsR = abs(p.y);
@@ -201,7 +214,7 @@ void move(struct vector c) {
   unsigned int tr = 1000000.0 * t / stepsR; // time per step us/step
   
   struct vector dt = {tl,tr};
-  print_v("tl,tr",dt,"us");
+//  print_v("tl,tr",dt,"us");
   
   unsigned long start_time = micros();
   while(stepsL>0 || stepsR>0){
@@ -227,7 +240,7 @@ void move(struct vector c) {
     
   }
   
-  print_f("Duration", (micros()-start_time)/1000000.0, "s");
+//  print_f("Duration", (micros()-start_time)/1000000.0, "s");
   
   L = Ln; // new L length
   R = Rn; // new R length
