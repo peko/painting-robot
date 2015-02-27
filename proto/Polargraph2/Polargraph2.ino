@@ -1,13 +1,13 @@
 #define MINIMUM_DELAY_BETWEEN_STEPS 20000
 #define STEPS_PER_REVOLUTION 64*16
 // #define DISTANCE_BETWEEN_MOTORS 1175
-#define DISTANCE_BETWEEN_MOTORS 800
-#define LEFT_STRING_LENGTH 720
-#define RIGHT_STRING_LENGTH 720
+#define DISTANCE_BETWEEN_MOTORS 1175
+#define LEFT_STRING_LENGTH 750
+#define RIGHT_STRING_LENGTH 750
 #define VELOCITY 10.0
 #define WIDTH 300.0
 #define HEIGHT 300.0
-#define SEED 9
+#define SEED 13
 
 #define L0 10
 #define L1 11
@@ -52,9 +52,9 @@ double
   V, // Moving velocity mm/s
   S; // Steps of motor per mm; 
   
-#include "tests.h"
+//#include "tests.h"
 //#include "panda.h"
-//#include "planes.h"
+#include "planes.h"
 
 void setup(){
   
@@ -99,20 +99,20 @@ void loop() {
 // spiral(); 
 //  draw_ailove(random(5));
 //  move_random(5+random(20)); 
-//  trajectory();
+trajectory();
 //
 //
 //
-//draw_panda(0.3);
-//move_random(20.0);
-circle(2);
-move({30,0});
-circle(2);
-move({-20,0});
-circle(1);
-move({15,0});
-circle(1);
-delay(1000);
+////draw_panda(0.3);
+////move_random(20.0);
+//circle(2);
+//move({30,0});
+//circle(2);
+//move({-20,0});
+//circle(1);
+//move({15,0});
+//circle(1);
+//delay(1000);
 
 }
 

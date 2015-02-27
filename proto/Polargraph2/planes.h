@@ -68,11 +68,15 @@ void trajectory() {
       norm(&v, R);
       v.x = v.x*cm-v.y*sm;
       v.y = v.x*sm+v.y*cm;
+      
+      v.x *=0.25;
+      v.y *=0.25;
+      
       move(v);
 //      triangle(v);
       if(!(i%4)) perpendicular(v);
     }
-    draw_plane(0.3, v);
+    draw_plane(0.1, v);
   }
 }
 #endif 

@@ -1,9 +1,9 @@
 #define MINIMUM_DELAY_BETWEEN_STEPS 20000
 #define STEPS_PER_REVOLUTION 64*16
 // #define DISTANCE_BETWEEN_MOTORS 1175
-#define DISTANCE_BETWEEN_MOTORS 800
-#define LEFT_STRING_LENGTH 720
-#define RIGHT_STRING_LENGTH 720
+#define DISTANCE_BETWEEN_MOTORS 1175
+#define LEFT_STRING_LENGTH 750
+#define RIGHT_STRING_LENGTH 750
 #define VELOCITY 15
 #define WIDTH 300.0
 #define HEIGHT 300.0
@@ -47,14 +47,14 @@ unsigned char pins_left [4] = {L0,L1,L2,L3}; // direct  order
 unsigned char pins_right[4] = {R3,R2,R1,R0}; // reverse order
 
 double 
-  l, // x coordinate relative left motor mm
+  l, l0, // x coordinate relative left motor mm
   L, Ln, // Left string length mm
-  r, // x coordinate realtive right motor mm
+  r,     // x coordinate realtive right motor mm
   R, Rn, // Right string length mm
-  h, // Height relative motors mm 
-  W, // Distance between motors mm
-  V, // Moving velocity mm/s
-  S; // Steps of motor per mm; 
+  h, h0, // Height relative motors mm 
+  W,     // Distance between motors mm
+  V,     // Moving velocity mm/s
+  S;     // Steps of motor per mm; 
 
 void setup(){
   
@@ -87,13 +87,14 @@ void setup(){
 }
 
 void loop() {  
+  
+  static struct vector st={0.0,0.0}; // start point
+  
+  double dx,dy, x,y;
+  
   while (Serial.available()) {
     char cmd = Serial.read();
-    
-    while(cmd==0x20) {
-       Serial.print("."); 
-       cmd = Serial.read();
-    }
+    if(cmd==32 || cmd==-1) return;
     
     Serial.print(cmd);
     Serial.print(" 0x");
@@ -107,12 +108,33 @@ void loop() {
         down();
         break;
       case 'm':
-        moveto({Serial.parseFloat(),  Serial.parseFloat()});
+        dx = Serial.parseFloat();
+        dy = Serial.parseFloat();
+        st = {(l-l0)+dx, (h-h0)+dy};
+        moveto({dx,dy});
+        break;
+      case 'M':
+        x = Serial.parseFloat();
+        y = Serial.parseFloat();
+        st = {x,y};
+        print_v("st",st,"mm");
+        print_v("lh",{l,h},"mm");
+        print_v("l0h0",{l0,h0},"mm");
+        print_v("moveto",{ x-(l-l0), y-(h-h0) },"mm");
+        moveto({ x-(l-l0), y-(h-h0) });
         break;
       case 'l':
         lineto({Serial.parseFloat(),  Serial.parseFloat()});
         break;
+      case 'L':
+        x = Serial.parseFloat();
+        y = Serial.parseFloat();
+        print_v("xy", {x,y}, "mm");
+        lineto({x-(l-l0),  y-(h-h0)});
+        break;
       case 'z':
+      case 'Z':
+        lineto({st.x-(l-l0),  st.y-(h-h0)});
         up();
         break;
     }
@@ -121,11 +143,11 @@ void loop() {
 }
 
 void up() {
-  servo.write(40);
+  servo.write(25);
 }
 
 void down() {
-  servo.write(5);
+  servo.write(10);
 }
 
 void calcGeometry() {
@@ -135,7 +157,8 @@ void calcGeometry() {
   h = 2.0 * p * ir / W;                  // height
   l = sqrt(L*L-h*h);                     // left projection
   r = W - l;                             // right projection
-  
+  l0 = l;
+  h0 = h;
 //  Serial.println("Calc geomtry:" );
 //  print_f("Half perim" , p , "mm");
 //  print_f("In circle r", ir, "mm");
@@ -193,7 +216,9 @@ void lineto(struct vector c) {
   
   unsigned long mc=0, mcl=0, mcr=0;
   
-  double d = sqrt(c.x*c.x+c.y*c.y); // distance to move 
+  double d = sqrt(c.x*c.x+c.y*c.y); // distance to move
+  
+  if(d<0.0001) return;
 //  print_f("Dist", d, "mm");
   
   double t = d/V;                   // time to move distance / velocity

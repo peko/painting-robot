@@ -1,5 +1,5 @@
-PORT = "COM9"
-FILE ="./data/beauty.tsp"
+PORT = "/dev/ttyUSB0"
+FILE ="./data/test.d"
 SCALE = 1.0
 
 SerialPort = require("serialport").SerialPort
@@ -25,29 +25,39 @@ listPorts = ->
 scale = (s)->
     p = s.split(",")
     if p.length == 2 and parseFloat(p[0]) != NaN and parseFloat(p[1]) != NaN
-        return "#{parseFloat(p[0])*SCALE},#{-1*parseFloat(p[1])*SCALE}"
+        return "#{(parseFloat(p[0])*SCALE).toFixed(4)},#{(parseFloat(p[1])*SCALE).toFixed(4)}"
     s
 
 pushNext = ()->
 
     c = data[count++];
 
-    if !c then process.exit 0
+    if !c
+        console.log "<< [M 0.0,0.0]"
+        serialPort.write "М 0.0,0.0 "
+        process.exit 0
     
     switch c
         when 'm'
             command = "m #{scale(data[count++])}"
+        when 'M'
+            command = "M #{scale(data[count++])}"
         when 'l' 
             command =  "l #{scale(data[count++])}"
+        when 'L' 
+            command =  "L #{scale(data[count++])}"
         when 'z'
+            command =  "z"
+        when 'Z'
             command =  "z"
         else
             p = c.split(",")
             if p.length == 2 and parseFloat(p[0]) != NaN and parseFloat(p[1]) != NaN
                 command = "l #{scale(c)}"
-            else 
+            else
+                console.log "?[#{c}]" 
                 return
-                console.log "?[#{c}]"
+
 
     console.log "<< [#{command}]"
     serialPort.write "#{command} "
