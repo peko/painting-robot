@@ -1,4 +1,8 @@
-PORT = "/dev/ttyUSB0"
+# PORT = "/dev/ttyUSB0"
+
+GOST = import("GOST").GOST
+
+PORT = "COM9"
 FILE ="./data/test.d"
 SCALE = 1.0
 
