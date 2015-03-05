@@ -1,9 +1,7 @@
 # PORT = "/dev/ttyUSB0"
 
-GOST = import("GOST").GOST
-
 PORT = "COM9"
-FILE ="./data/test.d"
+FILE ="./data/skull.d"
 SCALE = 1.0
 
 SerialPort = require("serialport").SerialPort
