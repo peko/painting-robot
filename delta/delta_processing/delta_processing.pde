@@ -13,7 +13,7 @@ import processing.serial.*;
 boolean debug = false;
 
 // robot geometry
-static float e  =  1;     // end effector triangle
+static float e  = 10;    // end effector triangle
 static float f  = 20;    // base triangle
 static float re = 26;    //length of long arm
 static float rf = 10;    //length of short arm
@@ -271,8 +271,7 @@ void draw() {
   camera();
   translate(450,100,0);
   endCamera();
-  rotateX(PI/2.0-(2-float(mouseY)/height)*PI/6.0);
-  rotateZ(PI/2.0+float(mouseX)/width*PI/6.0);
+
   drawRobot();
   popMatrix();
   
@@ -285,53 +284,115 @@ void drawRobot() {
   fill(255);
   stroke(0);
   
-  float h = sqrt(f*f-f*f/4)/3.0;
+  pushMatrix();
   
-  pushMatrix();
-  translate(h*s, 0, 0);
-  rotateY(t1/180.0*PI);
-  translate(rf/2.0*s,0,0);
-  box(rf*s,2,2);
-  popMatrix();  
+    rotateX(PI/2.0-(2-float(mouseY)/height)*PI/6.0);
+    rotateZ(PI/2.0+float(mouseX)/width*PI/6.0);
+    
+    float h = f*sqrt(3.0)/6.0;
+    float m = rf/2.0*s;
+    
+    float R = f*sqrt(3.0)/3.0;
 
-  pushMatrix();
-  rotateZ(PI*2.0/3.0);
-  translate(h*s, 0, 0);
-  rotateY(t2/180.0*PI);
-  translate(rf/2.0*s,0,0);
-  box(rf*s,2,2);
-  popMatrix();
+    pushMatrix();
+      noFill();
+      rotateZ(PI/3.0);
+      triangle(-R/2.0*s, f/2.0*s,
+                R    *s,       0,
+               -R/2.0*s,-f/2.0*s);
+      fill(255);
+      ellipse( 0.0, 0.0, R*s, R*s);
+    popMatrix();
+    
+    pushMatrix();
+      translate(h*s, 0, 0);
+      rotateY(t1/180.0*PI);
+      translate(m,0,0);
+      box(m*2.0,2,2);
+      float x1 = modelX(m,0,0);
+      float y1 = modelY(m,0,0);
+      float z1 = modelZ(m,0,0);
+    popMatrix();  
+  
+    pushMatrix();
+      rotateZ(PI*2.0/3.0);
+      translate(h*s, 0, 0);
+      rotateY(t2/180.0*PI);
+      translate(m,0,0);
+      box(m*2,2,2);
+      float x2 = modelX(m,0,0);
+      float y2 = modelY(m,0,0);
+      float z2 = modelZ(m,0,0);
+    popMatrix();
+  
+    pushMatrix();
+      rotateZ(PI*4.0/3.0);
+      translate(h*s, 0, 0);
+      rotateY(t3/180.0*PI);
+      translate(rf/2.0*s,0,0);
+      box(m*2.0,2,2);
+      float x3 = modelX(m,0,0);
+      float y3 = modelY(m,0,0);
+      float z3 = modelZ(m,0,0);
+    popMatrix();
+      
+    pushMatrix();
+      rotateZ(PI/2.0);
+      translate(xp*s, yp*s, zp*s);
+      //box(5);
+      
+      noFill();
+      R = e*sqrt(3.0)/3.0;
+      rotateZ(-PI/6.0);
+      triangle(-R/2.0*s, e/2.0*s,
+                R    *s,       0,
+               -R/2.0*s,-e/2.0*s);
+               
+      fill(255);
+      ellipse( 0.0, 0.0, R*s, R*s);
+      rotateZ(PI);
+      float u1 = modelX(-R/4.0*s,e/4.0*s,0);
+      float v1 = modelY(-R/4.0*s,e/4.0*s,0);
+      float w1 = modelZ(-R/4.0*s,e/4.0*s,0);
+      
+      float u2 = modelX(-R/4.0*s,-e/4.0*s,0);
+      float v2 = modelY(-R/4.0*s,-e/4.0*s,0);
+      float w2 = modelZ(-R/4.0*s,-e/4.0*s,0);
 
-  pushMatrix();
-  rotateZ(PI*4.0/3.0);
-  translate(h*s, 0, 0);
-  rotateY(t3/180.0*PI);
-  translate(rf/2.0*s,0,0);
-  box(rf*s,2,2);
+      float u3 = modelX(R/2.0*s,0,0);
+      float v3 = modelY(R/2.0*s,0,0);
+      float w3 = modelZ(R/2.0*s,0,0);
+      
+    popMatrix();
+  
+    pushMatrix();
+      translate(0,0,min_z*s);
+      stroke(0,0,0,128);
+      drawPlane(s);
+      popMatrix();
+      pushMatrix();
+      translate(0,0,max_z*s);
+      stroke(255,255,255,50);
+      drawPlane(s);
+    popMatrix();
+    
+    pushMatrix();
+      rotateZ(PI/2.0);
+      stroke(0,0,0,50);
+      line(xp*s,yp*s,zp*s,xp*s,yp*s,min_z*s);
+      line(xp*s,yp*s,zp*s,0,0,0);
+      float cx = modelX(xp*s,yp*s,zp*s);
+      float cy = modelY(xp*s,yp*s,zp*s);
+      float cz = modelZ(xp*s,yp*s,zp*s);
+    popMatrix();
+    
   popMatrix();
   
-  pushMatrix();
-  rotateZ(PI/2.0);
-  translate(xp*s, yp*s, zp*s);
-  box(10); 
-  popMatrix();
-
-  pushMatrix();
-  translate(0,0,min_z*s);
-  stroke(0,0,0,128);
-  drawPlane(s);
-  popMatrix();
-  pushMatrix();
-  translate(0,0,max_z*s);
-  stroke(0,0,0,10);
-  drawPlane(s);
-  popMatrix();
+  stroke(0,0,0,200);
+  line(u1,v1,w1,x1,y1,z1);
+  line(u2,v2,w2,x2,y2,z2);
+  line(u3,v3,w3,x3,y3,z3);
   
-  pushMatrix();
-  rotateZ(PI/2.0);
-  stroke(0,0,0,50);
-  line(xp*s,yp*s,zp*s,xp*s,yp*s,min_z*s);
-  popMatrix();
 };
 
 void drawPlane(float s){
