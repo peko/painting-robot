@@ -77,9 +77,9 @@ Slider servo3;
 
 void setup() {
   //open serial connection
-  myPort = new Serial(this, Serial.list()[0], 9600);
+//  myPort = new Serial(this, Serial.list()[0], 9600);
   
-  size(300,600);
+  size(600,600,P3D);
   frameRate(25);
   controlP5 = new ControlP5(this);  
   controlP5.setColorLabel(0xff000000);
@@ -264,6 +264,83 @@ void draw() {
     text("SERVO POWER ON", 100, 35); //hide
     fill(#ff0000);
     text("SERVO POWER OFF", 100, 35); //show this
+  }
+  
+  pushMatrix();
+  beginCamera();
+  camera();
+  translate(450,100,0);
+  endCamera();
+  rotateX(PI/2.0-(2-float(mouseY)/height)*PI/6.0);
+  rotateZ(PI/2.0+float(mouseX)/width*PI/6.0);
+  drawRobot();
+  popMatrix();
+  
+}
+
+void drawRobot() {
+
+  float s = 10.0; // scale
+  
+  fill(255);
+  stroke(0);
+  
+  float h = sqrt(f*f-f*f/4)/3.0;
+  
+  pushMatrix();
+  translate(h*s, 0, 0);
+  rotateY(t1/180.0*PI);
+  translate(rf/2.0*s,0,0);
+  box(rf*s,2,2);
+  popMatrix();  
+
+  pushMatrix();
+  rotateZ(PI*2.0/3.0);
+  translate(h*s, 0, 0);
+  rotateY(t2/180.0*PI);
+  translate(rf/2.0*s,0,0);
+  box(rf*s,2,2);
+  popMatrix();
+
+  pushMatrix();
+  rotateZ(PI*4.0/3.0);
+  translate(h*s, 0, 0);
+  rotateY(t3/180.0*PI);
+  translate(rf/2.0*s,0,0);
+  box(rf*s,2,2);
+  popMatrix();
+  
+  pushMatrix();
+  rotateZ(PI/2.0);
+  translate(xp*s, yp*s, zp*s);
+  box(10); 
+  popMatrix();
+
+  pushMatrix();
+  translate(0,0,min_z*s);
+  stroke(0,0,0,128);
+  drawPlane(s);
+  popMatrix();
+  pushMatrix();
+  translate(0,0,max_z*s);
+  stroke(0,0,0,10);
+  drawPlane(s);
+  popMatrix();
+  
+  pushMatrix();
+  rotateZ(PI/2.0);
+  stroke(0,0,0,50);
+  line(xp*s,yp*s,zp*s,xp*s,yp*s,min_z*s);
+  popMatrix();
+};
+
+void drawPlane(float s){
+  int st = 10;
+  for(int i=0; i<=st; i++){
+    float dx=(max_x-min_x)/st;
+    float dy=(max_y-min_y)/st;
+    line((min_x+dx*i)*s, min_y      *s,(min_x+dx*i)*s, max_y      *s);
+    line( min_x      *s,(min_y+dy*i)*s, max_x      *s,(min_y+i*dy)*s); 
   }
 }
 
