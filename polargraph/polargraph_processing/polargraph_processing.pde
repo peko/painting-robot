@@ -21,19 +21,38 @@ void keyPressed() {
   if(key==CODED) {
     switch(keyCode) {
       case UP:
-         port.write("m 0.0 -10.0 ");
+         move(0.0, -10.0);
          break;
       case DOWN:
-         port.write("m 0.0 10.0 ");
+         move(0.0, 10.0);
          break;
       case LEFT:
-         port.write("m -10.0 0.0 ");
+         move(-10.0,0.0);
          break;
       case RIGHT:
-         port.write("m 10.0 0.0 ");
+         move( 10.0,0.0);
          break;
-
+      case 34: // page up
+         up();
+         break;
+      case 33: // page down
+         down(); 
+         break;
+      default:
+        print(" "+keyCode);
     }
   }
-  println(key);
+  //println(key);
+}
+
+void move(float dx, float dy) {
+  port.write("m "+nf(dx,0,2)+" "+nf(dy,0,2)+" ");
+}
+
+void up() {
+  port.write("u ");
+}
+
+void down() {
+  port.write("d ");
 }
