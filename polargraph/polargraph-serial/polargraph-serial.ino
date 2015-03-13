@@ -1,10 +1,10 @@
 #define MINIMUM_DELAY_BETWEEN_STEPS 20000
 #define STEPS_PER_REVOLUTION 64*16
-// #define DISTANCE_BETWEEN_MOTORS 1175
-#define DISTANCE_BETWEEN_MOTORS 800
-#define LEFT_STRING_LENGTH 720
-#define RIGHT_STRING_LENGTH 720
-#define VELOCITY 15
+#define DISTANCE_BETWEEN_MOTORS 1175
+//#define DISTANCE_BETWEEN_MOTORS 800
+#define LEFT_STRING_LENGTH 750
+#define RIGHT_STRING_LENGTH 750
+#define VELOCITY 25
 #define WIDTH 300.0
 #define HEIGHT 300.0
 #define SEED 9
@@ -143,7 +143,7 @@ void loop() {
 }
 
 void up() {
-  servo.write(15);
+  servo.write(25);
 }
 
 void down() {

@@ -1,7 +1,7 @@
-# PORT = "/dev/ttyUSB0"
+PORT = "/dev/ttyUSB0"
 
-PORT = "COM9"
-FILE ="./data/skull.d"
+# PORT = "COM9"
+FILE ="./data/st_bunny_05.d"
 SCALE = 1.0
 
 SerialPort = require("serialport").SerialPort
