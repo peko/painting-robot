@@ -1,6 +1,9 @@
 # painting-robot
 Code for control servos of painting robot.
 
+# Polarhand
+![polargraph](https://raw.githubusercontent.com/peko/painting-robot/master/polarhand/processing.png)
+
 # Polargraph
 ![polargraph](http://img.youtube.com/vi/Mnwpy-2SXUU/0.jpg)
 
