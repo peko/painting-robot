@@ -63,6 +63,7 @@ void moveTo(float x0,float y0,float x1,float y1) {
     y0+=dy;
   } 
 }
+
 void grid(float s=20.0) {
   float sx = 60;
   float sy = 60;
@@ -84,7 +85,8 @@ void grid(float s=20.0) {
 }
 
 void spiral(float dr=0.25) {
- float cx = 130;
+  
+  float cx = 130;
   float cy = 130;
   float R=5.0; 
   float dda=0.0;
