@@ -2,9 +2,13 @@
 Code for control servos of painting robot.
 
 # Polarhand
+
+Iverse kinematics solver for hand drawing robot
+
 ![polargraph](https://raw.githubusercontent.com/peko/painting-robot/master/polarhand/processing.png)
 
 # Polargraph
+
 ![polargraph](http://img.youtube.com/vi/Mnwpy-2SXUU/0.jpg)
 
 # Delta
