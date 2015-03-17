@@ -8,8 +8,8 @@ class Arms extends Part {
       
     setSize(10, 60);
     
-}
-  
+  }
+
   void draw(){
     
     pushMatrix();
