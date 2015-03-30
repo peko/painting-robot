@@ -3,7 +3,6 @@ class Legs extends Part {
   Hips hips;
   
   Legs(Hips hips) {
-
     setSize(10,60);
     this.hips  = hips;
   }
