@@ -2,9 +2,11 @@
 
 GOST = require("./GOST").GOST
 
-PORT = "COM9"
+#PORT = "COM9"
+PORT = "/dev/ttyUSB0"
+
 FILE ="./data/test.d"
-SCALE = 1.0
+SCALE = 5.0
 
 SerialPort = require("serialport").SerialPort
 serialPort = require "serialport"
@@ -92,12 +94,12 @@ openSerial = (data, callback)->
 console.log data
 
 
-text = "Дхритараштра спросил:\nО Санджая, что стали делать\nмои сыновья и сыновья Панду,\nкогда, горя желанием вступить в бой,\nсобрались в месте паломничества,\nна поле Курукшетра?"
+text = "АНТОН! УХОДИ!"
 
-lh   = 15.0
+lh   = 15.0*SCALE
 line = 0
-start_x = -150.0
-start_y = -150.0
+start_x = -200.0/SCALE
+start_y = -250.0/SCALE
 
 code = "M #{start_x},#{start_y} ";
 

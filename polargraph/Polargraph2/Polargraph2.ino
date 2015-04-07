@@ -93,18 +93,66 @@ void border() {
   move({-WIDTH/2.0,HEIGHT/2.0});
 }
 
+void spiral_exp() {
+  float i = 1;
+  float di = 0.5;
+  float s = random(20)+10;
+  int d = 50;
+  while(i<s) {  
+    move({ i,   0});delay(d); i+=di;
+    move({ 0,   i});delay(d); i+=di;
+    move({-i,   0});delay(d); i+=di;
+    move({ 0,  -i});delay(d); i+=di;
+    di+=0.1;
+  }
+}
+
+
+void wigly(float R) {
+  float steps= 36.0;
+  
+  struct vector v = {R,0};
+  
+  float alpha = 10.0/180.0*PI;
+  double cp = cos(alpha);
+  double sp = sin(alpha);
+  double cm = cos(-alpha);
+  double sm = sin(-alpha);
+  
+  while (1) { 
+    
+    R=0.5+5.0*random(100)/100.0;
+    float c = random(36);
+    for (int i = 0; i<c; i++) {
+      norm(&v, R);
+      v.x= v.x*cp-v.y*sp;
+      v.y= v.x*sp+v.y*cp;
+      move(v);
+    }
+    c = 18+random(36);
+    R=0.1+random(100)/100.0;
+    for (int i = 0; i<c; i++) {
+      norm(&v, R);
+      v.x = v.x*cm-v.y*sm;
+      v.y = v.x*sm+v.y*cm;
+      move(v);
+    }  
+  }
+}
+
+
 void loop() {
-//  draw_panda(0.02+random(50)/1000.0);
-//  move_random(20.0);
-// spiral(); 
+//move_random(20.0);
+//spiral_exp(); 
+wigly(100);
 //  draw_ailove(random(5));
 //  move_random(5+random(20)); 
-trajectory();
+// trajectory();
 //
 //
 //
 ////draw_panda(0.3);
-////move_random(20.0);
+//move_random(20.0);
 //circle(2);
 //move({30,0});
 //circle(2);

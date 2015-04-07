@@ -4,7 +4,7 @@
 //#define DISTANCE_BETWEEN_MOTORS 800
 #define LEFT_STRING_LENGTH 750
 #define RIGHT_STRING_LENGTH 750
-#define VELOCITY 25
+#define VELOCITY 15
 #define WIDTH 300.0
 #define HEIGHT 300.0
 #define SEED 9
@@ -143,11 +143,11 @@ void loop() {
 }
 
 void up() {
-  servo.write(25);
+  servo.write(45);
 }
 
 void down() {
-  servo.write(5);
+  servo.write(25);
 }
 
 void calcGeometry() {

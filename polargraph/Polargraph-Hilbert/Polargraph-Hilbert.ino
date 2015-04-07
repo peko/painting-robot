@@ -4,7 +4,7 @@
 #define DISTANCE_BETWEEN_MOTORS 1175
 #define LEFT_STRING_LENGTH 750
 #define RIGHT_STRING_LENGTH 750
-#define VELOCITY 5
+#define VELOCITY 10
 #define WIDTH 300.0
 #define HEIGHT 300.0
 #define SEED 9
@@ -82,7 +82,7 @@ void setup(){
 }
 
 void loop() {
-  hilbert(2.5  );
+  hilbert(1);
 }
 
 void calcGeometry() {

@@ -233,15 +233,15 @@ void tricky_spirals() {
 
 //void stepper(int xw, int s);
 void loop() {
-   hilbert();
+//   hilbert();
 // vibrating_hilbert(); 
 //   spiral();
-//     tricky_spirals();
+     tricky_spirals();
 }
 
 void stepper(int xw, int s){
   for (int x=0;x<xw;x++){
-    delay(10);
+    delay(2);
     switch(Steps){
        case 0:
          digitalWrite(p[0+s], LOW); 
