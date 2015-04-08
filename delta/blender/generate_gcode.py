@@ -20,9 +20,9 @@ yo = 0.0
 zo = 0.0
 w = 1
 
-min_step = 2;
+min_step = 2
+merge_dist = 5
 parsed_splines = []
-splines_ends = []
 current_spline = None
 
 #cubic bezier value
@@ -92,7 +92,6 @@ def split_segment(seg):
 def parse_spline(spline):
 
     global parsed_splines
-    global splines_ends
     global current_spline 
 
     current_spline = []
@@ -121,8 +120,7 @@ def parse_spline(spline):
             # last point (first one) cyclic
             current_spline.append((n.co[0], n.co[1],))
 
-    parsed_splines.append(current_spline)
-    splines_ends.append((spline.bezier_points,,))
+    parsed_splines.append(current_spline)      
 
 def MakePolyLine(objname, curvename, cList):    
     curvedata = bpy.data.curves.new(name=curvename, type='CURVE')    
@@ -163,26 +161,90 @@ def generate_gcode():
     G+="G28\n"
 
 
-def reverse_spline():
+def optimize_splines():
+    return
 
-def optimize_spline():
+def dist(p1,p2):
+    return math.sqrt((p1[0]-p2[0])*(p1[0]-p2[0])+(p1[1]-p2[1])*(p1[1]-p2[1]))
 
 def merge_near_splines():
+    
+    global parsed_splines
 
+    for s1 in parsed_splines:
+        for s2 in parsed_splines: 
+            if s1 != s2:
+                if dist(s1[-1],s2[0]) < merge_dist:
+                    s1+=s2
+                    parsed_splines.remove(s2)
+                elif dist(s1[-1],s2[-1]) < merge_dist:
+                    s2.reverse()
+                    s1+=s2
+                    parsed_splines.remove(s2)
+                elif dist(s1[0], s2[0]) < merge_dist:
+                    s1.reverse()
+                    s1+=s2
+                    parsed_splines.remove(s2)
+                elif dist(s1[0], s2[-1]) < merge_dist:
+                    s1.reverse()
+                    s2.reverse()
+                    s1+=s2
+                    parsed_splines.remove(s2)
+
+# http://hackaday.io/project/4955-g-code-optimization
+# simple
 def optimize_order():
+
+    global parsed_splines
+
+    for i in range(0,len(parsed_splines)-1):
+        s1 = parsed_splines[i]
+        min_d = float('inf')
+        closest = None
+        for j in range(i+1, len(parsed_splines)):
+            s2 = parsed_splines[j]
+            m = min(dist(s1[-1],s2[0]),dist(s1[-1],s2[-1]),dist(s1[0],s2[0]),dist(s1[0],s2[-1]))
+            if m<min_d: 
+                min_d = m
+                closest = j
+        # make closest spline next
+        parsed_splines[i+1], parsed_splines[closest] = parsed_splines[closest], parsed_splines[i+1]         
+        
+        # check orientation of splines
+        s2 = parsed_splines[i+1]
+        eb = dist(s1[-1],s2[ 0]) # end   - begin
+        ee = dist(s1[-1],s2[-1]) # end   - end
+        bb = dist(s1[ 0],s2[ 0]) # begin - begin
+        be = dist(s1[ 0],s2[-1]) # begin - end
+        m = min(eb, ee, bb, be)
+
+        if m == eb:
+            print(m,"eb") 
+        if m == ee:
+            print(m, "ee")
+            s2.reverse()
+        elif m == bb:
+            print(m, "bb")
+            s1.reverse()
+        elif m == be:
+            print(m, "be")
+            s1.reverse()
+            s2.reverse()
+    
+    return
 
 def parse_curve(curve):
     for spline in curve.data.splines:
         parse_spline(spline)
 
-    optimize_splines()
-    merge_near_splines()
+    # merge_near_splines()
+    # optimize_splines()
     optimize_order()
 
+print("-------")
 for s in sel:
     if s.type == 'CURVE':
         parse_curve(s)
-
 
 generate_gcode()
     
