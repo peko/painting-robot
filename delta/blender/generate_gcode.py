@@ -192,7 +192,9 @@ def merge_near_splines():
                     parsed_splines.remove(s2)
 
 # http://hackaday.io/project/4955-g-code-optimization
-# simple
+# gredy short path 
+# 2opt must be here or ant optimisation
+
 def optimize_order():
 
     global parsed_splines
@@ -214,23 +216,10 @@ def optimize_order():
         s2 = parsed_splines[i+1]
         eb = dist(s1[-1],s2[ 0]) # end   - begin
         ee = dist(s1[-1],s2[-1]) # end   - end
-        bb = dist(s1[ 0],s2[ 0]) # begin - begin
-        be = dist(s1[ 0],s2[-1]) # begin - end
-        m = min(eb, ee, bb, be)
+        m = min(eb, ee)
 
-        if m == eb:
-            print(m,"eb") 
-        if m == ee:
-            print(m, "ee")
-            s2.reverse()
-        elif m == bb:
-            print(m, "bb")
-            s1.reverse()
-        elif m == be:
-            print(m, "be")
-            s1.reverse()
-            s2.reverse()
-    
+        if m == ee: s2.reverse()
+           
     return
 
 def parse_curve(curve):
