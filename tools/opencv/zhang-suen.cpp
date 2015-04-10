@@ -14,6 +14,9 @@ using namespace cv;
 
 RNG rng(12345);
 
+int thresh = 100;
+int max_thresh = 255;
+Mat src;
 
 /**
  * Perform one thinning iteration.
@@ -124,25 +127,19 @@ void thinning(const Mat& src, Mat& dst)
     dst *= 255;
 }
 
-/**
- * This is an example on how to call the thinning funciton above
- */
-int main() {
 
-	Mat src = imread("image.jpg");
-	vector<vector<Point> > contours;
+void thresh_callback(int, void*) {
+
+    vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
 
-    if (!src.data)
-		return -1;
-
-	Mat bw;
-	cvtColor(src, bw, COLOR_BGR2GRAY);
+    Mat bw;
+    cvtColor(src, bw, COLOR_BGR2GRAY);
     fastNlMeansDenoising(bw,bw);
-    adaptiveThreshold( bw, bw, 255,ADAPTIVE_THRESH_MEAN_C,THRESH_BINARY,13, 1 );
+    // adaptiveThreshold( bw, bw, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY,13, 1 );
     bitwise_not(bw,bw);
-    // threshold(bw, bw, 64, 255, THRESH_BINARY);
-	thinning(bw, bw);
+    threshold(bw, bw, 64, 255, THRESH_BINARY);
+    thinning(bw, bw);
 
     // int dilation_size = 1;
     // Mat dil = getStructuringElement( MORPH_RECT,
@@ -158,10 +155,27 @@ int main() {
        drawContours( drawing, contours, i, color, 1, 8, hierarchy, 0, Point() );
      }
 
-	imshow("src", src);
-	imshow("dst", bw);
+    imshow("dst", bw);
     imshow("contours", drawing);
     
+}
+
+/**
+ * This is an example on how to call the thinning funciton above
+ */
+int main() {
+
+	src = imread("image.jpg");
+    if (!src.data) return -1;
+
+    /// Create Window
+    char* source_window = "Source";
+    namedWindow( source_window, WINDOW_AUTOSIZE );
+    imshow( source_window, src );
+
+    createTrackbar( " Threshold:", "Source", &thresh, max_thresh, thresh_callback );
+    thresh_callback( 0, 0 );
+
 	waitKey();
 	return 0;
 }
