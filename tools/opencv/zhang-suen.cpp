@@ -17,14 +17,16 @@ RNG rng(12345);
 int thresh = 100;
 int max_thresh = 255;
 Mat src;
+Mat thr;
+Mat cnt;
 
 /**
  * Perform one thinning iteration.
  * Normally you wouldn't call this function directly from your code.
  *
  * Parameters:
- * 		im    Binary image with range = [0,1]
- * 		iter  0=even, 1=odd
+ *      im    Binary image with range = [0,1]
+ *      iter  0=even, 1=odd
  */
 void thinningIteration(Mat& img, int iter)
 {
@@ -105,8 +107,8 @@ void thinningIteration(Mat& img, int iter)
  * Function for thinning the given binary image
  *
  * Parameters:
- * 		src  The source image, binary with range = [0,255]
- * 		dst  The destination image
+ *      src  The source image, binary with range = [0,255]
+ *      dst  The destination image
  */
 void thinning(const Mat& src, Mat& dst)
 {
@@ -134,12 +136,14 @@ void thresh_callback(int, void*) {
     vector<Vec4i> hierarchy;
 
     Mat bw;
+
     cvtColor(src, bw, COLOR_BGR2GRAY);
     fastNlMeansDenoising(bw,bw);
-    // adaptiveThreshold( bw, bw, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY,13, 1 );
-    bitwise_not(bw,bw);
-    threshold(bw, bw, 64, 255, THRESH_BINARY);
-    thinning(bw, bw);
+    adaptiveThreshold( bw, thr, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY,13, 1 );
+    bitwise_not(thr,thr);
+    // threshold(bw, bw, 64, 255, THRESH_BINARY);
+    
+    thinning(thr, cnt);
 
     // int dilation_size = 1;
     // Mat dil = getStructuringElement( MORPH_RECT,
@@ -147,7 +151,7 @@ void thresh_callback(int, void*) {
     //                                    Point( dilation_size, dilation_size ) );
     // erode(bw,bw, dil);
     
-    findContours( bw, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
+    findContours( cnt, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
     /// Draw contours
     Mat drawing = Mat::zeros( bw.size(), CV_8UC3 );
     for( int i = 0; i< contours.size(); i++ ) {
@@ -155,7 +159,9 @@ void thresh_callback(int, void*) {
        drawContours( drawing, contours, i, color, 1, 8, hierarchy, 0, Point() );
      }
 
-    imshow("dst", bw);
+    imshow("Threshold", thr);
+    imshow("Contours" , cnt);
+    
     imshow("contours", drawing);
     
 }
@@ -165,11 +171,11 @@ void thresh_callback(int, void*) {
  */
 int main() {
 
-	src = imread("image.jpg");
+	src = imread("data/img01.jpg");
     if (!src.data) return -1;
 
     /// Create Window
-    char* source_window = "Source";
+    const char* source_window = "Source";
     namedWindow( source_window, WINDOW_AUTOSIZE );
     imshow( source_window, src );
 
