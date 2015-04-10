@@ -1,24 +1,5 @@
-/**
- * Code for thinning a binary image using Zhang-Suen algorithm.
- *
- * Author:  Nash (nash [at] opencv-code [dot] com) 
- * Website: http://opencv-code.com
- */
-#include <opencv2/opencv.hpp>
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
 
-using namespace std;
-using namespace cv;
-
-RNG rng(12345);
-
-int thresh = 100;
-int max_thresh = 255;
-Mat src;
-Mat thr;
-Mat cnt;
+#include "zhang-suen.h"
 
 /**
  * Perform one thinning iteration.
@@ -129,59 +110,3 @@ void thinning(const Mat& src, Mat& dst)
     dst *= 255;
 }
 
-
-void thresh_callback(int, void*) {
-
-    vector<vector<Point> > contours;
-    vector<Vec4i> hierarchy;
-
-    Mat bw;
-
-    cvtColor(src, bw, COLOR_BGR2GRAY);
-    fastNlMeansDenoising(bw,bw);
-    adaptiveThreshold( bw, thr, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY,13, 1 );
-    bitwise_not(thr,thr);
-    // threshold(bw, bw, 64, 255, THRESH_BINARY);
-    
-    thinning(thr, cnt);
-
-    // int dilation_size = 1;
-    // Mat dil = getStructuringElement( MORPH_RECT,
-    //                                    Size( 2*dilation_size + 1, 2*dilation_size+1 ),
-    //                                    Point( dilation_size, dilation_size ) );
-    // erode(bw,bw, dil);
-    
-    findContours( cnt, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
-    /// Draw contours
-    Mat drawing = Mat::zeros( bw.size(), CV_8UC3 );
-    for( int i = 0; i< contours.size(); i++ ) {
-       Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-       drawContours( drawing, contours, i, color, 1, 8, hierarchy, 0, Point() );
-     }
-
-    imshow("Threshold", thr);
-    imshow("Contours" , cnt);
-    
-    imshow("contours", drawing);
-    
-}
-
-/**
- * This is an example on how to call the thinning funciton above
- */
-int main() {
-
-	src = imread("data/img01.jpg");
-    if (!src.data) return -1;
-
-    /// Create Window
-    const char* source_window = "Source";
-    namedWindow( source_window, WINDOW_AUTOSIZE );
-    imshow( source_window, src );
-
-    createTrackbar( " Threshold:", "Source", &thresh, max_thresh, thresh_callback );
-    thresh_callback( 0, 0 );
-
-	waitKey();
-	return 0;
-}
