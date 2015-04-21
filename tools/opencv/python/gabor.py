@@ -19,7 +19,7 @@ def build_kern():
     global kern
     # cv2.getGaborKernel(ksize, sigma, theta, lambda, gamma, psi, ktype)
     kern = getGaborKernel((ksize, ksize), sigma, theta, lmbda, gamma, psi, ktype=CV_32F)
-    kern /=kern.sum()*1.5
+    # kern /=kern.sum()*1.5
     imshow("kernel",kern)
 
 def process():
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     try:
         img_fn = sys.argv[1]
     except:
-        img_fn = '../data/test01.jpg'
+        img_fn = '../data/test04.png'
 
     img = imread(img_fn)
     if img is None:
