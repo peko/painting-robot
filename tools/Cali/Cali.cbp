@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Cali" />
+		<Option pch_mode="2" />
+		<Option compiler="clang" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Cali" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="clang" />
+				<Option parameters="../data/test03.png" />
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Cali" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="0" />
+				<Option compiler="clang" />
+				<Option parameters="../data/test03.jpg" />
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-std=c++98" />
+			<Add option="`opencv-config --cxxflags`" />
+			<Add directory="/usr/local/include" />
+		</Compiler>
+		<Linker>
+			<Add option="`opencv-config --ldstaticflags`" />
+			<Add library="stdc++" />
+			<Add library="opencv_core" />
+			<Add library="opencv_highgui" />
+			<Add library="opencv_imgcodecs" />
+			<Add library="opencv_imgproc" />
+			<Add library="opencv_photo" />
+		</Linker>
+		<Unit filename="lena.jpg" />
+		<Unit filename="main.cpp" />
+		<Unit filename="zhang-suen.cpp" />
+		<Unit filename="zhang-suen.h" />
+		<Extensions>
+			<code_completion>
+				<search_path add="/usr/local/include" />
+			</code_completion>
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
